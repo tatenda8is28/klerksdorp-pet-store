@@ -1,0 +1,15 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-blue: #004694;
+  --color-brand-yellow: #facc15;
+  --color-brand-red: #dc2626;
+}
+
+:root {
+  background-color: #f8fafc;
+  color: #1e293b;
+  font-family: 'Inter', system-ui, sans-serif;
+}
+
+.no-scrollbar::-webkit-scrollbar { display: none; }
