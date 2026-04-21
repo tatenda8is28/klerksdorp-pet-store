@@ -9,6 +9,9 @@ export default function Store() {
   const [filter, setFilter] = useState('All');
   const [loading, setLoading] = useState(true);
 
+  // The 5 categories from your Admin panel
+  const categories = ["All", "Dog Food", "Cat Food", "Bird Food", "Medicine"];
+
   useEffect(() => {
     let channel;
 
@@ -18,7 +21,7 @@ export default function Store() {
         let q = supabase.from('products').select('*').order('created_at', { ascending: false });
         
         if (filter !== 'All') {
-          q = q.eq('brand', filter);
+          q = q.eq('category', filter);
         }
 
         const { data, error } = await q;
@@ -44,24 +47,26 @@ export default function Store() {
     <div className="min-h-screen flex flex-col bg-white">
       <StoreHeader />
       
-      <main className="max-w-7xl mx-auto px-6 py-16 w-full flex-grow">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-12 gap-8">
-          <h2 className="text-4xl font-black text-[#004694] uppercase italic tracking-tighter leading-none">
-            Our Food <span className="text-gray-300">/ {filter}</span>
+      <main className="max-w-7xl mx-auto px-6 py-10 md:py-16 w-full flex-grow">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+          
+          <h2 className="text-3xl md:text-4xl font-black text-[#004694] uppercase italic tracking-tighter leading-none">
+            Our Food <span className="text-gray-200">/ {filter}</span>
           </h2>
           
-          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
-            {["All", "Montego", "Jock", "Nutribyte", "Rimax", "Ideal"].map(b => (
+          {/* FIXED: Changed to flex-wrap so MEDICINE shows up on the next line on small screens */}
+          <div className="w-full md:w-auto flex flex-wrap md:flex-nowrap gap-2">
+            {categories.map(c => (
               <button 
-                key={b} 
-                onClick={() => setFilter(b)}
-                className={`px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest border-2 transition-all ${
-                  filter === b 
+                key={c} 
+                onClick={() => setFilter(c)}
+                className={`px-5 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest border-2 transition-all whitespace-nowrap ${
+                  filter === c 
                   ? 'bg-[#004694] border-[#004694] text-white shadow-lg' 
                   : 'bg-white text-gray-400 border-gray-100 hover:border-gray-300'
                 }`}
               >
-                {b}
+                {c}
               </button>
             ))}
           </div>
@@ -78,8 +83,8 @@ export default function Store() {
                 <ProductCard key={p.id} product={p} />
               ))
             ) : (
-              <div className="col-span-full text-center py-20 text-gray-400 font-bold uppercase italic">
-                No products found in this category.
+              <div className="col-span-full text-center py-20 text-gray-400 font-bold uppercase italic border-2 border-dashed border-gray-100 rounded-3xl">
+                No products found in {filter}.
               </div>
             )}
           </div>

@@ -5,6 +5,7 @@ import Store from './pages/Store';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Checkout from './pages/Checkout';
+import Orders from './pages/Orders'; // IMPORT THE NEW PAGE
 import AdminDashboard from './pages/AdminDashboard';
 import AdminOrders from './pages/AdminOrders';
 import AdminInventory from './pages/AdminInventory';
@@ -21,6 +22,9 @@ function App() {
         <Route path="/contact" element={<Contact />} />
         <Route path="/checkout" element={<Checkout />} />
         
+        {/* ADD THE NEW ROUTE */}
+        <Route path="/orders" element={<Orders />} />
+
         {/* Driver Portal */}
         <Route path="/driver" element={<DriverPortal />} />
 

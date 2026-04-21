@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useCart } from '../context/CartContext';
-import Navbar from '../components/Navbar';
+import StoreHeader from '../components/StoreHeader'; // CHANGED THIS
 import Footer from '../components/Footer';
 import { Loader2, ChevronLeft, Banknote, CreditCard } from 'lucide-react';
 
@@ -50,8 +50,8 @@ export default function Checkout() {
                 phone: formData.phone,
                 delivery_address: formData.delivery_address,
                 special_instructions: formData.special_instructions,
-                total_amount: getCartTotal() + 40, // Add delivery fee
-                delivery_fee: 40, // Store delivery fee separately
+                total_amount: getCartTotal() + 40, 
+                delivery_fee: 40, 
                 status: 'Pending',
                 payment_method: formData.payment_method,
                 delivery_slot: formData.delivery_slot
@@ -73,7 +73,6 @@ export default function Checkout() {
                 throw itemsError;
             }
 
-            // Update product inventory for each item in the order
             for (const item of cart) {
                 const { data: product } = await supabase.from('products').select('stock_level').eq('id', item.id).single();
                 if (product) {
@@ -95,7 +94,8 @@ export default function Checkout() {
 
     return (
         <div className="min-h-screen bg-[#f8fafc]">
-            <Navbar />
+            <StoreHeader /> {/* CHANGED FROM NAVBAR TO STOREHEADER */}
+            
             <main className="max-w-7xl mx-auto px-6 py-10 lg:py-20">
                 <div className="flex flex-col gap-8 lg:flex-row lg:items-end lg:justify-between mb-10">
                     <div>
@@ -135,7 +135,7 @@ export default function Checkout() {
                                     <input
                                         required
                                         className="w-full rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm font-black outline-none transition focus:border-[#1E3A8A]"
-                                        placeholder="Aaron Mutsvanga"
+                                        placeholder="Full Name"
                                         value={formData.customer_name}
                                         onChange={(e) => setFormData({ ...formData, customer_name: e.target.value })}
                                     />
@@ -145,7 +145,7 @@ export default function Checkout() {
                                     <input
                                         required
                                         className="w-full rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm font-black outline-none transition focus:border-[#1E3A8A]"
-                                        placeholder="06530515942"
+                                        placeholder="Phone Number"
                                         value={formData.phone}
                                         onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                                     />
@@ -158,7 +158,7 @@ export default function Checkout() {
                                     required
                                     rows={4}
                                     className="w-full rounded-[40px] border border-slate-200 bg-slate-50 px-6 py-5 text-sm font-black outline-none transition focus:border-[#1E3A8A]"
-                                    placeholder="22 Willow Street, Klerksdorp"
+                                    placeholder="Full Address"
                                     value={formData.delivery_address}
                                     onChange={(e) => setFormData({ ...formData, delivery_address: e.target.value })}
                                 />
@@ -181,7 +181,7 @@ export default function Checkout() {
                                     <span className="text-xs uppercase tracking-[0.35em] text-slate-400 font-black">Special instructions</span>
                                     <input
                                         className="w-full rounded-3xl border border-slate-200 bg-slate-50 px-5 py-4 text-sm font-black outline-none transition focus:border-[#1E3A8A]"
-                                        placeholder="Leave at gate, knock twice"
+                                        placeholder="Leave at gate, etc."
                                         value={formData.special_instructions}
                                         onChange={(e) => setFormData({ ...formData, special_instructions: e.target.value })}
                                     />
@@ -234,19 +234,15 @@ export default function Checkout() {
                         </div>
 
                         <div className="space-y-4 mb-8">
-                            {cart.length ? (
-                                cart.map((item) => (
-                                    <div key={item.id} className="flex items-center justify-between gap-4 rounded-3xl bg-white/10 px-5 py-4">
-                                        <div>
-                                            <p className="font-black uppercase tracking-[0.2em] text-sm">{item.name}</p>
-                                            <p className="text-xs text-blue-100">Qty {item.quantity}</p>
-                                        </div>
-                                        <p className="font-black text-lg text-yellow-300">R {(item.price * item.quantity).toFixed(2)}</p>
+                            {cart.map((item) => (
+                                <div key={item.id} className="flex items-center justify-between gap-4 rounded-3xl bg-white/10 px-5 py-4">
+                                    <div>
+                                        <p className="font-black uppercase tracking-[0.2em] text-sm">{item.name}</p>
+                                        <p className="text-xs text-blue-100">Qty {item.quantity}</p>
                                     </div>
-                                ))
-                            ) : (
-                                <p className="rounded-3xl bg-white/10 px-5 py-6 text-center text-sm text-blue-100">Add a few items from the store to complete your checkout.</p>
-                            )}
+                                    <p className="font-black text-lg text-yellow-300">R {(item.price * item.quantity).toFixed(2)}</p>
+                                </div>
+                            ))}
                         </div>
 
                         <div className="rounded-[40px] bg-white/10 px-6 py-6">
@@ -263,10 +259,6 @@ export default function Checkout() {
                                 <span>R {(getCartTotal() + 40).toFixed(2)}</span>
                             </div>
                         </div>
-
-                        <p className="mt-8 text-sm leading-6 text-blue-100/90">
-                            Confirm your checkout and we will start preparing your order immediately. You will be redirected home once the order is placed.
-                        </p>
                     </aside>
                 </div>
             </main>
