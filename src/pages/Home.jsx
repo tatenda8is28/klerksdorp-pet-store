@@ -8,11 +8,20 @@ export default function Home() {
   const [products, setProducts] = useState([]);
 
   useEffect(() => {
+    const channel = supabase.channel('products')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, async () => {
+        const { data } = await supabase.from('products').select('*').limit(4).order('created_at', { ascending: false });
+        setProducts(data || []);
+      })
+      .subscribe();
+
     async function fetch() {
       const { data } = await supabase.from('products').select('*').limit(4).order('created_at', { ascending: false });
       setProducts(data || []);
     }
+
     fetch();
+    return () => supabase.removeChannel(channel);
   }, []);
 
   return (

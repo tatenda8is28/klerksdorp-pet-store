@@ -10,6 +10,8 @@ export default function Store() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    let channel;
+
     async function fetchProducts() {
       setLoading(true);
       try {
@@ -29,7 +31,13 @@ export default function Store() {
         setLoading(false);
       }
     }
+
     fetchProducts();
+    channel = supabase.channel('products')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'products' }, fetchProducts)
+      .subscribe();
+
+    return () => supabase.removeChannel(channel);
   }, [filter]);
 
   return (
