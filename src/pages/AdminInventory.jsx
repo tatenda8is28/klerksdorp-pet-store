@@ -11,7 +11,7 @@ export default function AdminInventory() {
   const [imagePreview, setImagePreview] = useState(null);
   const [uploading, setUploading] = useState(false);
 
-  // Added "Accessories" to the list
+  // Added "Accessories" category
   const categories = ["All", "Dog Food", "Cat Food", "Bird Food", "Medicine", "Accessories"];
 
   useEffect(() => {
@@ -48,14 +48,16 @@ export default function AdminInventory() {
     const file = e.target.files[0];
     if (!file) return;
 
+    // Show preview
     const reader = new FileReader();
     reader.onload = () => setImagePreview(reader.result);
     reader.readAsDataURL(file);
 
+    // Upload to Supabase Storage
     setUploading(true);
-    const fileName = `${Date.now()}_${file.name}`;
+    const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
     
-    // FIXED: Added 'products/' prefix to match your bucket structure
+    // FIXED: Uploading specifically to the /products folder in your bucket
     const { data, error } = await supabase.storage
       .from('product-images')
       .upload(`products/${fileName}`, file);
@@ -66,6 +68,9 @@ export default function AdminInventory() {
         .getPublicUrl(`products/${fileName}`);
       
       setForm({ ...form, image_url: publicUrl });
+    } else if (error) {
+      console.error("Upload error:", error.message);
+      alert("Error uploading: " + error.message);
     }
 
     setUploading(false);
@@ -84,13 +89,15 @@ export default function AdminInventory() {
 
     if (!error && data) {
       setProducts(prev => [...prev, ...data]);
+      setForm({ name: '', brand: 'Montego', image_url: '', price: '', category: 'Dog Food', stock: 0 });
+      setImagePreview(null);
+    } else {
+      alert("Error adding product: " + error.message);
     }
-
-    setForm({ name: '', brand: 'Montego', image_url: '', price: '', category: 'Dog Food', stock: 0 });
-    setImagePreview(null);
   }
 
   async function handleDeleteProduct(id) {
+    if(!confirm("Are you sure you want to delete this?")) return;
     await supabase.from('products').delete().eq('id', id);
     setProducts(prev => prev.filter(product => product.id !== id));
   }
@@ -136,6 +143,7 @@ export default function AdminInventory() {
               
               <div className="space-y-3">
                 <label className="block">
+                  {/* accept="image/*" tells mobile browsers to offer Camera + Gallery */}
                   <input 
                     type="file" 
                     accept="image/*" 
