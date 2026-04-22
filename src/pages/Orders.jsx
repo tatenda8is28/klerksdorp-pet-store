@@ -1,110 +1,64 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import { useAuth } from '../context/AuthContext';
 import StoreHeader from '../components/StoreHeader';
 import Footer from '../components/Footer';
-import { Search, MapPin, Clock, Package, CheckCircle } from 'lucide-react';
+import { Package, MapPin, Clock, Loader2 } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Orders() {
-    const [phone, setPhone] = useState('');
+    const { user, loading: authLoading } = useAuth();
     const [orders, setOrders] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [hasSearched, setHasSearched] = useState(false);
+    const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
-    const trackOrder = async (e) => {
-        e.preventDefault();
-        if (!phone) return;
-        
-        setLoading(true);
-        setHasSearched(true);
-        const { data, error } = await supabase
-            .from('orders')
-            .select('*')
-            .eq('phone', phone)
-            .order('created_at', { ascending: false });
-        
-        if (data) setOrders(data);
-        setLoading(false);
-    };
+    useEffect(() => {
+        if (authLoading) return;
+        if (!user) {
+            navigate('/login');
+            return;
+        }
+
+        const fetchMyOrders = async () => {
+            const { data } = await supabase
+                .from('orders')
+                .select('*')
+                .eq('user_id', user.id)
+                .order('created_at', { ascending: false });
+            setOrders(data || []);
+            setLoading(false);
+        };
+
+        fetchMyOrders();
+    }, [user, authLoading]);
+
+    if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 className="animate-spin text-[#1E3A8A]" /></div>;
 
     return (
         <div className="min-h-screen flex flex-col bg-white">
             <StoreHeader />
             <main className="max-w-4xl mx-auto px-6 py-16 w-full flex-grow">
-                <div className="text-center mb-12">
-                    <h1 className="text-5xl md:text-6xl font-black uppercase italic tracking-tighter text-[#1E3A8A] mb-4">Track Your Order</h1>
-                    <p className="text-gray-400 font-bold uppercase text-xs tracking-[0.3em]">Enter your phone number to see your recent orders</p>
-                </div>
+                <h1 className="text-5xl font-black uppercase italic text-[#1E3A8A] mb-2">My Orders</h1>
+                <p className="text-gray-400 font-bold uppercase text-[10px] tracking-widest mb-12">Welcome back, {user?.user_metadata?.full_name}</p>
 
-                <form onSubmit={trackOrder} className="max-w-xl mx-auto flex flex-col sm:flex-row gap-4 mb-16">
-                    <input 
-                        type="text" 
-                        placeholder="Enter Phone Number (e.g. 0821234567)" 
-                        value={phone}
-                        onChange={(e) => setPhone(e.target.value)}
-                        className="flex-grow px-8 py-5 rounded-[25px] border-2 border-gray-100 font-black text-lg focus:outline-none focus:border-[#1E3A8A] transition-all"
-                    />
-                    <button className="bg-[#1E3A8A] text-white px-10 py-5 rounded-[25px] font-black uppercase italic tracking-tighter flex items-center justify-center gap-2 shadow-xl shadow-blue-100 hover:bg-blue-800 transition-all">
-                        <Search size={20} /> Track
-                    </button>
-                </form>
-
-                <div className="space-y-8">
-                    {loading ? (
-                        <div className="flex justify-center py-20">
-                            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#1E3A8A]"></div>
-                        </div>
-                    ) : (
-                        orders.map(order => (
-                            <div key={order.id} className="bg-white p-8 md:p-10 rounded-[45px] border border-gray-100 shadow-sm hover:shadow-md transition-all">
-                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-                                    <div className="flex items-center gap-6">
-                                        <div className={`w-16 h-16 rounded-3xl flex items-center justify-center ${order.status === 'Delivered' ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-[#1E3A8A]'}`}>
-                                            {order.status === 'Delivered' ? <CheckCircle size={30} /> : <Package size={30} />}
-                                        </div>
-                                        <div>
-                                            <div className="flex items-center gap-3 mb-1">
-                                                <span className={`text-[10px] font-black uppercase tracking-[0.2em] px-3 py-1 rounded-full ${
-                                                    order.status === 'Delivered' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-[#1E3A8A]'
-                                                }`}>
-                                                    {order.status}
-                                                </span>
-                                                <span className="text-gray-300 font-bold text-xs uppercase">#{order.id.slice(0,8)}</span>
-                                            </div>
-                                            <h3 className="text-2xl font-black uppercase italic text-gray-900 leading-none">{order.customer_name}</h3>
-                                        </div>
-                                    </div>
-                                    <div className="text-left md:text-right w-full md:w-auto pt-4 md:pt-0 border-t md:border-t-0 border-gray-50">
-                                        <p className="text-3xl font-black text-[#1E3A8A] italic">R {order.total_amount}</p>
-                                        <p className="text-[10px] font-black uppercase text-gray-400 tracking-widest mt-1">
-                                            Ordered {new Date(order.created_at).toLocaleDateString()}
-                                        </p>
-                                    </div>
+                <div className="space-y-6">
+                    {orders.length > 0 ? orders.map(order => (
+                        <div key={order.id} className="p-8 rounded-[40px] border border-gray-100 bg-gray-50/30 shadow-sm">
+                            <div className="flex justify-between items-start mb-6">
+                                <div>
+                                    <span className="px-4 py-1 rounded-full bg-blue-100 text-[#1E3A8A] text-[10px] font-black uppercase tracking-widest">{order.status}</span>
+                                    <h3 className="text-xl font-black uppercase italic mt-3">Order #{order.id.slice(0,8)}</h3>
                                 </div>
-                                
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 pt-8 border-t border-gray-50">
-                                    <div className="flex items-start gap-3">
-                                        <MapPin className="text-[#1E3A8A] flex-shrink-0" size={18} />
-                                        <div>
-                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Delivery Address</p>
-                                            <p className="font-bold text-gray-800 text-sm leading-tight">{order.delivery_address}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-start gap-3">
-                                        <Clock className="text-[#1E3A8A] flex-shrink-0" size={18} />
-                                        <div>
-                                            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Delivery Slot</p>
-                                            <p className="font-bold text-gray-800 text-sm">{order.delivery_slot}</p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <p className="text-2xl font-black text-[#1E3A8A]">R {order.total_amount}</p>
                             </div>
-                        ))
-                    )}
-                    
-                    {hasSearched && !loading && orders.length === 0 && (
-                        <div className="text-center py-20 bg-gray-50 rounded-[45px] border-2 border-dashed border-gray-200">
-                            <p className="text-gray-400 font-black uppercase italic text-xl">No orders found for this phone number.</p>
-                            <p className="text-gray-400 text-xs font-bold mt-2 uppercase tracking-widest">Please check the number and try again.</p>
+                            <div className="grid gap-2 text-xs font-bold text-gray-500 uppercase">
+                                <p className="flex items-center gap-2"><MapPin size={14}/> {order.delivery_address}</p>
+                                <p className="flex items-center gap-2"><Clock size={14}/> {order.delivery_slot}</p>
+                            </div>
+                        </div>
+                    )) : (
+                        <div className="text-center py-20 bg-gray-50 rounded-[40px] border-2 border-dashed border-gray-200">
+                            <p className="font-black text-gray-400 uppercase italic">You haven't ordered anything yet.</p>
                         </div>
                     )}
                 </div>

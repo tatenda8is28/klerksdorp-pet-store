@@ -1,40 +1,63 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
+import { AuthProvider } from './context/AuthContext';
+import ProtectedRoute from './components/ProtectedRoute';
+
+// Public Pages
 import Home from './pages/Home';
 import Store from './pages/Store';
 import About from './pages/About';
 import Contact from './pages/Contact';
 import Checkout from './pages/Checkout';
-import Orders from './pages/Orders'; // IMPORT THE NEW PAGE
+import Orders from './pages/Orders';
+import Login from './pages/Login';
+
+// Portals
 import AdminDashboard from './pages/AdminDashboard';
 import AdminOrders from './pages/AdminOrders';
 import AdminInventory from './pages/AdminInventory';
-import AdminDrivers from './pages/AdminDrivers';
 import DriverPortal from './pages/DriverPortal';
 
 function App() {
   return (
-    <div className="min-h-screen bg-white">
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/store" element={<Store />} />
-        <Route path="/about" element={<About />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/checkout" element={<Checkout />} />
-        
-        {/* ADD THE NEW ROUTE */}
-        <Route path="/orders" element={<Orders />} />
+    <AuthProvider>
+      <div className="min-h-screen bg-white">
+        <Routes>
+          {/* 1. PUBLIC ROUTES (I RESTORED THESE) */}
+          <Route path="/" element={<Home />} />
+          <Route path="/store" element={<Store />} />
+          <Route path="/about" element={<About />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/checkout" element={<Checkout />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/login" element={<Login />} />
 
-        {/* Driver Portal */}
-        <Route path="/driver" element={<DriverPortal />} />
+          {/* 2. PROTECTED: ONLY DRIVERS */}
+          <Route path="/driver" element={
+            <ProtectedRoute roleRequired="driver">
+              <DriverPortal />
+            </ProtectedRoute>
+          } />
 
-        {/* Admin Management */}
-        <Route path="/admin" element={<AdminDashboard />} />
-        <Route path="/admin/orders" element={<AdminOrders />} />
-        <Route path="/admin/inventory" element={<AdminInventory />} />
-        <Route path="/admin/drivers" element={<AdminDrivers />} />
-      </Routes>
-    </div>
+          {/* 3. PROTECTED: ONLY ADMIN */}
+          <Route path="/admin" element={
+            <ProtectedRoute roleRequired="admin">
+              <AdminDashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/orders" element={
+            <ProtectedRoute roleRequired="admin">
+              <AdminOrders />
+            </ProtectedRoute>
+          } />
+          <Route path="/admin/inventory" element={
+            <ProtectedRoute roleRequired="admin">
+              <AdminInventory />
+            </ProtectedRoute>
+          } />
+        </Routes>
+      </div>
+    </AuthProvider>
   );
 }
 

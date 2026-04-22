@@ -1,44 +1,30 @@
 import React from 'react';
 import StoreHeader from '../components/StoreHeader';
-import { Award, ShieldCheck, Heart } from 'lucide-react';
+import Footer from '../components/Footer';
 
 export default function About() {
-  return (
-    <div className="min-h-screen bg-white">
-      <StoreHeader />
-      <main className="max-w-4xl mx-auto px-6 py-24 text-center">
-        <span className="text-[#004694] font-black uppercase tracking-[0.3em] text-xs leading-none">Family Business Est. 2014</span>
-        <h2 className="text-6xl font-black text-gray-900 uppercase italic italic tracking-tighter mt-4 mb-10 leading-none">Our Story</h2>
-        
-        <div className="space-y-8 text-xl text-gray-500 font-medium leading-relaxed italic">
-          <p>
-            We are a family business established in 2014. We know how important your pets are to you. 
-            That is why our staff is trained to help you select the correct food for your dog or cat's needs.
-          </p>
-          <p>
-            As the market leader in pet products in Klerksdorp, we take pride in being the bridge 
-            between premium pet nutrition and your doorstep.
-          </p>
+    return (
+        <div className="min-h-screen flex flex-col bg-white">
+            <StoreHeader />
+            <main className="max-w-7xl mx-auto px-6 py-20 w-full flex-grow">
+                <div className="max-w-3xl">
+                    <h1 className="text-5xl md:text-7xl font-black uppercase italic tracking-tighter text-[#1E3A8A] mb-8 leading-none">
+                        Family Owned <br/> <span className="text-yellow-400">Since 2014</span>
+                    </h1>
+                    <div className="space-y-6 text-gray-500 font-bold uppercase text-sm tracking-wide leading-relaxed">
+                        <p className="border-l-4 border-[#1E3A8A] pl-6 italic text-lg text-slate-800">
+                            Klerksdorp Hondekos is the market leader in pet nutrition within the North West province.
+                        </p>
+                        <p>
+                            We specialize in bulk pet food distribution, ensuring that your furry friends get the best quality nutrition at the best possible price. Our "Pallet Buster" specials are designed to bring maximum value directly to your doorstep.
+                        </p>
+                        <p>
+                            With nearly a decade of experience, our mission remains the same: Seamless online shopping, reliable delivery, and a passion for pet health.
+                        </p>
+                    </div>
+                </div>
+            </main>
+            <Footer />
         </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-12 mt-24">
-          <div className="flex flex-col items-center">
-            <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center text-[#004694] mb-6 shadow-inner"><Award size={32}/></div>
-            <h4 className="font-black uppercase text-sm italic mb-2 tracking-widest tracking-tighter">Market Leader</h4>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Top Quality Brands Only</p>
-          </div>
-          <div className="flex flex-col items-center">
-            <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center text-[#004694] mb-6 shadow-inner"><Heart size={32}/></div>
-            <h4 className="font-black uppercase text-sm italic mb-2 tracking-widest tracking-tighter">We Love Pets</h4>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Bring them to meet us!</p>
-          </div>
-          <div className="flex flex-col items-center">
-            <div className="w-20 h-20 bg-blue-50 rounded-full flex items-center justify-center text-[#004694] mb-6 shadow-inner"><ShieldCheck size={32}/></div>
-            <h4 className="font-black uppercase text-sm italic mb-2 tracking-widest tracking-tighter">Expert Advice</h4>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest leading-none">Nutrition Trained Staff</p>
-          </div>
-        </div>
-      </main>
-    </div>
-  );
+    );
 }
