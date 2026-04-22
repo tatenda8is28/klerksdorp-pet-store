@@ -16,6 +16,7 @@ import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminOrders from './pages/AdminOrders';
 import AdminInventory from './pages/AdminInventory';
+import AdminDrivers from './pages/AdminDrivers'; // ENSURING THIS IS HERE
 import DriverPortal from './pages/DriverPortal';
 
 function App() {
@@ -23,7 +24,7 @@ function App() {
     <AuthProvider>
       <div className="min-h-screen bg-white">
         <Routes>
-          {/* 1. PUBLIC ROUTES (I RESTORED THESE) */}
+          {/* 1. PUBLIC ROUTES */}
           <Route path="/" element={<Home />} />
           <Route path="/store" element={<Store />} />
           <Route path="/about" element={<About />} />
@@ -53,6 +54,12 @@ function App() {
           <Route path="/admin/inventory" element={
             <ProtectedRoute roleRequired="admin">
               <AdminInventory />
+            </ProtectedRoute>
+          } />
+          {/* FIXED: ADDED THE MISSING DRIVERS ROUTE BELOW */}
+          <Route path="/admin/drivers" element={
+            <ProtectedRoute roleRequired="admin">
+              <AdminDrivers />
             </ProtectedRoute>
           } />
         </Routes>
