@@ -3,15 +3,15 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-    // 1. Load cart from localStorage on startup
+    // Load from memory on start
     const [cart, setCart] = useState(() => {
-        const saved = localStorage.getItem('pet_store_cart');
+        const saved = localStorage.getItem('klerksdorp_cart');
         return saved ? JSON.parse(saved) : [];
     });
 
-    // 2. Save cart to localStorage whenever it changes
+    // Save to memory whenever cart changes
     useEffect(() => {
-        localStorage.setItem('pet_store_cart', JSON.stringify(cart));
+        localStorage.setItem('klerksdorp_cart', JSON.stringify(cart));
     }, [cart]);
 
     const addToCart = (product) => {
@@ -23,9 +23,10 @@ export const CartProvider = ({ children }) => {
     };
 
     const removeFromCart = (id) => setCart(prev => prev.filter(item => item.id !== id));
+    
     const clearCart = () => {
         setCart([]);
-        localStorage.removeItem('pet_store_cart');
+        localStorage.removeItem('klerksdorp_cart');
     };
 
     const getCartTotal = () => cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
