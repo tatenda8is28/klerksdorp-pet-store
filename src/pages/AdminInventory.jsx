@@ -11,7 +11,8 @@ export default function AdminInventory() {
   const [imagePreview, setImagePreview] = useState(null);
   const [uploading, setUploading] = useState(false);
 
-  const categories = ["All", "Dog Food", "Cat Food", "Bird Food", "Medicine"];
+  // Added "Accessories" to the list
+  const categories = ["All", "Dog Food", "Cat Food", "Bird Food", "Medicine", "Accessories"];
 
   useEffect(() => {
     let active = true;
@@ -35,7 +36,6 @@ export default function AdminInventory() {
     };
   }, []);
 
-  // FAST ACTION: Update database instantly
   async function adjustStock(id, currentStock, amount) {
     const newStock = Math.max(0, currentStock + amount);
     const { error } = await supabase.from('products').update({ stock_level: newStock }).eq('id', id);
@@ -48,18 +48,23 @@ export default function AdminInventory() {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Show preview
     const reader = new FileReader();
     reader.onload = () => setImagePreview(reader.result);
     reader.readAsDataURL(file);
 
-    // Upload to Supabase Storage
     setUploading(true);
     const fileName = `${Date.now()}_${file.name}`;
-    const { data, error } = await supabase.storage.from('product-images').upload(fileName, file);
+    
+    // FIXED: Added 'products/' prefix to match your bucket structure
+    const { data, error } = await supabase.storage
+      .from('product-images')
+      .upload(`products/${fileName}`, file);
 
     if (!error && data) {
-      const { data: { publicUrl } } = supabase.storage.from('product-images').getPublicUrl(fileName);
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(`products/${fileName}`);
+      
       setForm({ ...form, image_url: publicUrl });
     }
 
@@ -90,7 +95,6 @@ export default function AdminInventory() {
     setProducts(prev => prev.filter(product => product.id !== id));
   }
 
-  // CALCULATIONS
   const totalValue = products.reduce((acc, p) => acc + (p.price * p.stock_level), 0);
   const lowStockCount = products.filter(p => p.stock_level <= 5).length;
   const filteredProducts = activeTab === 'All' ? products : products.filter(p => p.category === activeTab);
@@ -98,7 +102,6 @@ export default function AdminInventory() {
   return (
     <AdminLayout>
       <div className="space-y-8 animate-in fade-in duration-500 px-6 lg:px-12 py-10 lg:py-12">
-        {/* 1. WAREHOUSE INTELLIGENCE HEADER */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white p-6 rounded-3xl border border-slate-100 shadow-sm flex items-center gap-4">
           <div className="bg-green-50 p-4 rounded-2xl text-green-600"><TrendingUp /></div>
@@ -124,8 +127,6 @@ export default function AdminInventory() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-10">
-        
-        {/* 2. NEW PRODUCT FORM (Simplified) */}
         <div className="xl:col-span-1">
           <form onSubmit={handleAddProduct} className="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100 sticky top-10">
             <h3 className="text-lg font-black uppercase italic text-[#004694] mb-6">Receive New Batch</h3>
@@ -133,7 +134,6 @@ export default function AdminInventory() {
               <input type="text" placeholder="Item Name" className="w-full bg-slate-50 p-4 rounded-2xl border-none font-bold" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
               <input type="text" placeholder="Brand" className="w-full bg-slate-50 p-4 rounded-2xl border-none font-bold" value={form.brand} onChange={e => setForm({...form, brand: e.target.value})} required />
               
-              {/* Image Upload Section */}
               <div className="space-y-3">
                 <label className="block">
                   <input 
@@ -162,9 +162,7 @@ export default function AdminInventory() {
           </form>
         </div>
 
-        {/* 3. QUICK-STOCK GRID */}
         <div className="xl:col-span-3 space-y-6">
-          {/* CATEGORY TABS */}
           <div className="flex gap-2 overflow-x-auto no-scrollbar pb-2">
             {categories.map(cat => (
               <button key={cat} onClick={() => setActiveTab(cat)} className={`px-8 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest transition-all ${activeTab === cat ? 'bg-[#004694] text-white shadow-lg' : 'bg-white text-slate-400 border'}`}>
@@ -218,7 +216,6 @@ export default function AdminInventory() {
             </div>
           )}
         </div>
-
       </div>
     </div>  </AdminLayout>  );
 }

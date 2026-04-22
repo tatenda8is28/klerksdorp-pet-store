@@ -9,8 +9,8 @@ export default function Store() {
   const [filter, setFilter] = useState('All');
   const [loading, setLoading] = useState(true);
 
-  // The 5 categories from your Admin panel
-  const categories = ["All", "Dog Food", "Cat Food", "Bird Food", "Medicine"];
+  // Added "Accessories" to the list
+  const categories = ["All", "Dog Food", "Cat Food", "Bird Food", "Medicine", "Accessories"];
 
   useEffect(() => {
     let channel;
@@ -54,7 +54,6 @@ export default function Store() {
             Our Food <span className="text-gray-200">/ {filter}</span>
           </h2>
           
-          {/* FIXED: Changed to flex-wrap so MEDICINE shows up on the next line on small screens */}
           <div className="w-full md:w-auto flex flex-wrap md:flex-nowrap gap-2">
             {categories.map(c => (
               <button 

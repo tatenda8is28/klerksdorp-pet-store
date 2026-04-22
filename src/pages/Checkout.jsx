@@ -7,7 +7,7 @@ import StoreHeader from '../components/StoreHeader';
 import Footer from '../components/Footer';
 import { Loader2, ChevronLeft, Banknote, CreditCard } from 'lucide-react';
 
-const DELIVERY_SLOTS = ['Morning (08:00 - 12:00)', 'Afternoon (12:00 - 16:00)', 'Evening (16:00 - 20:00)'];
+const DELIVERY_SLOTS = ['Morning (08:00 - 12:00)', 'Afternoon (12:00 - 16:00)'];
 
 export default function Checkout() {
     const { cart, getCartTotal, clearCart } = useCart();
