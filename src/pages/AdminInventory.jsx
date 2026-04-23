@@ -11,7 +11,6 @@ export default function AdminInventory() {
   const [imagePreview, setImagePreview] = useState(null);
   const [uploading, setUploading] = useState(false);
 
-  // Added "Accessories" category
   const categories = ["All", "Dog Food", "Cat Food", "Bird Food", "Medicine", "Accessories"];
 
   useEffect(() => {
@@ -48,16 +47,14 @@ export default function AdminInventory() {
     const file = e.target.files[0];
     if (!file) return;
 
-    // Show preview
     const reader = new FileReader();
     reader.onload = () => setImagePreview(reader.result);
     reader.readAsDataURL(file);
 
-    // Upload to Supabase Storage
     setUploading(true);
     const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
     
-    // FIXED: Uploading specifically to the /products folder in your bucket
+    // FIXED: Uploads to the products/ subfolder as required by your Supabase setup
     const { data, error } = await supabase.storage
       .from('product-images')
       .upload(`products/${fileName}`, file);
@@ -69,8 +66,7 @@ export default function AdminInventory() {
       
       setForm({ ...form, image_url: publicUrl });
     } else if (error) {
-      console.error("Upload error:", error.message);
-      alert("Error uploading: " + error.message);
+      alert("Upload failed: " + error.message);
     }
 
     setUploading(false);
@@ -91,13 +87,11 @@ export default function AdminInventory() {
       setProducts(prev => [...prev, ...data]);
       setForm({ name: '', brand: 'Montego', image_url: '', price: '', category: 'Dog Food', stock: 0 });
       setImagePreview(null);
-    } else {
-      alert("Error adding product: " + error.message);
     }
   }
 
   async function handleDeleteProduct(id) {
-    if(!confirm("Are you sure you want to delete this?")) return;
+    if(!confirm("Delete this product?")) return;
     await supabase.from('products').delete().eq('id', id);
     setProducts(prev => prev.filter(product => product.id !== id));
   }
@@ -134,6 +128,7 @@ export default function AdminInventory() {
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-10">
+        
         <div className="xl:col-span-1">
           <form onSubmit={handleAddProduct} className="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100 sticky top-10">
             <h3 className="text-lg font-black uppercase italic text-[#004694] mb-6">Receive New Batch</h3>
@@ -143,7 +138,7 @@ export default function AdminInventory() {
               
               <div className="space-y-3">
                 <label className="block">
-                  {/* accept="image/*" tells mobile browsers to offer Camera + Gallery */}
+                  {/* accept="image/*" triggers the Camera/Gallery menu on mobile */}
                   <input 
                     type="file" 
                     accept="image/*" 
@@ -157,7 +152,7 @@ export default function AdminInventory() {
                     <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                   </div>
                 )}
-                {uploading && <p className="text-[12px] text-slate-500 font-bold">Uploading image...</p>}
+                {uploading && <p className="text-[12px] text-slate-500 font-bold">Uploading...</p>}
               </div>
 
               <select className="w-full bg-slate-50 p-4 rounded-2xl border-none font-bold" value={form.category} onChange={e => setForm({...form, category: e.target.value})}>
@@ -224,6 +219,7 @@ export default function AdminInventory() {
             </div>
           )}
         </div>
+
       </div>
     </div>  </AdminLayout>  );
 }
