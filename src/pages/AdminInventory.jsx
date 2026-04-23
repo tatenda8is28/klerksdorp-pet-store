@@ -34,7 +34,7 @@ export default function AdminInventory() {
 
   async function adjustStock(id, currentStock, amount) {
     const newStock = Math.max(0, currentStock + amount);
-    const { error } = await supabase.from('products').update({ stock_level: newStock }).eq(id, id);
+    const { error } = await supabase.from('products').update({ stock_level: newStock }).eq('id', id);
     if (!error) {
       setProducts(prev => prev.map(p => p.id === id ? { ...p, stock_level: newStock } : p));
     }
@@ -51,6 +51,7 @@ export default function AdminInventory() {
     setUploading(true);
     const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
     
+    // Uploads to the products/ folder in your bucket
     const { data, error } = await supabase.storage
       .from('product-images')
       .upload(`products/${fileName}`, file);
@@ -129,10 +130,10 @@ export default function AdminInventory() {
                 
                 <div className="space-y-3">
                   <label className="block">
-                    {/* THIS INPUT TRIGGERS CAMERA/GALLERY ON MOBILE DEVICES */}
+                    {/* Updated attributes to better trigger the Camera/Gallery menu on mobile */}
                     <input 
                       type="file" 
-                      accept="image/*" 
+                      accept="image/*"
                       onChange={handleImageUpload}
                       disabled={uploading}
                       className="w-full bg-slate-50 p-4 rounded-2xl border-none font-bold cursor-pointer file:cursor-pointer file:bg-blue-500 file:text-white file:font-bold file:px-4 file:py-2 file:rounded-lg file:border-0 disabled:opacity-50"
@@ -143,7 +144,7 @@ export default function AdminInventory() {
                       <img src={imagePreview} alt="Preview" className="w-full h-full object-cover" />
                     </div>
                   )}
-                  {uploading && <p className="text-[12px] text-slate-500 font-bold">Processing...</p>}
+                  {uploading && <p className="text-[12px] text-slate-500 font-bold">Uploading...</p>}
                 </div>
 
                 <select className="w-full bg-slate-50 p-4 rounded-2xl border-none font-bold" value={form.category} onChange={e => setForm({...form, category: e.target.value})}>
