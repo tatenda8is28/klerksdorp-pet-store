@@ -36,8 +36,8 @@ export default function Footer() {
                     <div>
                         <h4 className="text-[10px] font-black uppercase tracking-widest text-yellow-400 mb-6">Find Us</h4>
                         <ul className="space-y-4 text-xs font-bold">
-                            <li className="flex gap-2 items-start"><MapPin size={16} className="text-yellow-400" /> 123 Main St, Klerksdorp</li>
-                            <li className="flex gap-2 items-center"><Phone size={16} className="text-yellow-400" /> 012 345 6789</li>
+                            <li className="flex gap-2 items-start"><MapPin size={16} className="text-yellow-400" /> 67 Buffeldoorn Wilkopies, Klerksdorp</li>
+                            <li className="flex gap-2 items-center"><Phone size={16} className="text-yellow-400" /> 082 307 6935</li>
                         </ul>
                     </div>
 
