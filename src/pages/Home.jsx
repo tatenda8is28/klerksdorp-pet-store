@@ -41,11 +41,11 @@ export default function Home() {
           {/* Left Side: Text and DESKTOP Button */}
           <div className="lg:w-1/2 p-10 lg:p-20 text-white z-10">
             <h2 className="text-6xl md:text-7xl font-black uppercase italic tracking-tighter leading-[0.9] mb-8">
-              Pallet Buster <br/> 
-              <span className="text-yellow-400">Specials</span>
+              Fast<br/> 
+              <span className="text-yellow-400">Delivery</span>
             </h2>
             <p className="text-blue-100 text-lg font-bold border-l-4 border-yellow-400 pl-6 uppercase max-w-md italic mb-10">
-              Bulk savings delivered directly to your door.
+              BETTER NUTRITION. BIGGER SAVINGS. DELIVERED DIRECTLY TO YOUR DOOR
             </p>
 
             {/* DESKTOP ONLY BUTTON */}
