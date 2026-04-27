@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
+import ReactGA from "react-ga4";
 
 const AuthContext = createContext({});
 
@@ -12,14 +13,21 @@ export const AuthProvider = ({ children }) => {
         // Initial session check
         supabase.auth.getSession().then(({ data: { session } }) => {
             setUser(session?.user ?? null);
-            if (session?.user) fetchProfile(session.user.id);
+            if (session?.user) {
+                fetchProfile(session.user.id);
+                // Analytics Identification
+                ReactGA.set({ userId: session.user.id });
+            }
             else setLoading(false);
         });
 
         // Listen for Auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
             setUser(session?.user ?? null);
-            if (session?.user) fetchProfile(session.user.id);
+            if (session?.user) {
+                fetchProfile(session.user.id);
+                ReactGA.set({ userId: session.user.id });
+            }
             else { setProfile(null); setLoading(false); }
         });
 

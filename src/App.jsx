@@ -1,7 +1,8 @@
-import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import React, { useEffect } from 'react';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
+import ReactGA from "react-ga4";
 
 // Public Pages
 import Home from './pages/Home';
@@ -16,10 +17,17 @@ import Login from './pages/Login';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminOrders from './pages/AdminOrders';
 import AdminInventory from './pages/AdminInventory';
-import AdminDrivers from './pages/AdminDrivers'; // ENSURING THIS IS HERE
+import AdminDrivers from './pages/AdminDrivers'; 
 import DriverPortal from './pages/DriverPortal';
 
 function App() {
+  const location = useLocation();
+
+  // Track page views on route change
+  useEffect(() => {
+    ReactGA.send({ hitType: "pageview", page: location.pathname + location.search });
+  }, [location]);
+
   return (
     <AuthProvider>
       <div className="min-h-screen bg-white">
@@ -56,7 +64,6 @@ function App() {
               <AdminInventory />
             </ProtectedRoute>
           } />
-          {/* FIXED: ADDED THE MISSING DRIVERS ROUTE BELOW */}
           <Route path="/admin/drivers" element={
             <ProtectedRoute roleRequired="admin">
               <AdminDrivers />

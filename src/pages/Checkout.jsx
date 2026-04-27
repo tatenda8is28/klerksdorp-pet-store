@@ -6,6 +6,7 @@ import { useAuth } from '../context/AuthContext';
 import StoreHeader from '../components/StoreHeader';
 import Footer from '../components/Footer';
 import { Loader2, ChevronLeft, Banknote, CreditCard } from 'lucide-react';
+import ReactGA from "react-ga4";
 
 const DELIVERY_SLOTS = ['Morning (08:00 - 12:00)', 'Afternoon (12:00 - 16:00)'];
 
@@ -42,6 +43,21 @@ export default function Checkout() {
             if (!error) {
                 const items = cart.map(i => ({ order_id: order.id, product_id: i.id, quantity: i.quantity, price_at_time: i.price }));
                 await supabase.from('order_items').insert(items);
+
+                // Analytics Injection: Purchase Event
+                ReactGA.event("purchase", {
+                    transaction_id: order.id,
+                    value: getCartTotal() + 40,
+                    currency: "ZAR",
+                    shipping: 40,
+                    items: cart.map(item => ({
+                        item_id: item.id,
+                        item_name: item.name,
+                        price: item.price,
+                        quantity: item.quantity
+                    }))
+                });
+
                 clearCart();
                 navigate('/orders');
             }

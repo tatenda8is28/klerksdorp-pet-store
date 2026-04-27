@@ -41,3 +41,6 @@ This project is licensed under the MIT License.
 ---
 
 Thank you for visiting the Klerksdorp Pet Store! We hope you have a great shopping experience!
+
+
+GA = G-0W1Q05N0X0

@@ -1,20 +1,31 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import ReactGA from "react-ga4";
 
 const CartContext = createContext();
 
 export const CartProvider = ({ children }) => {
-    // Load from memory on start
     const [cart, setCart] = useState(() => {
         const saved = localStorage.getItem('klerksdorp_cart');
         return saved ? JSON.parse(saved) : [];
     });
 
-    // Save to memory whenever cart changes
     useEffect(() => {
         localStorage.setItem('klerksdorp_cart', JSON.stringify(cart));
     }, [cart]);
 
     const addToCart = (product) => {
+        // Analytics Injection
+        ReactGA.event("add_to_cart", {
+            currency: "ZAR",
+            value: product.price,
+            items: [{
+                item_id: product.id,
+                item_name: product.name,
+                price: product.price,
+                quantity: 1
+            }]
+        });
+
         setCart(prev => {
             const exists = prev.find(item => item.id === product.id);
             if (exists) return prev.map(item => item.id === product.id ? { ...item, quantity: item.quantity + 1 } : item);

@@ -2,8 +2,17 @@ import React from 'react';
 import StoreHeader from '../components/StoreHeader';
 import Footer from '../components/Footer';
 import { Phone, MapPin, Mail, Clock } from 'lucide-react';
+import ReactGA from "react-ga4";
 
 export default function Contact() {
+    // Track when someone clicks to call
+    const trackCall = () => {
+        ReactGA.event("generate_lead", {
+            method: "Phone",
+            value: "Contact Page"
+        });
+    };
+
     return (
         <div className="min-h-screen flex flex-col bg-white">
             <StoreHeader />
@@ -14,15 +23,20 @@ export default function Contact() {
 
                 <div className="grid md:grid-cols-2 gap-16">
                     <div className="space-y-10">
-                        <div className="flex items-start gap-6">
-                            <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-[#1E3A8A] flex-shrink-0">
+                        {/* Wrap phone in a clickable link for mobile tracking */}
+                        <a 
+                            href="tel:0823076935" 
+                            onClick={trackCall}
+                            className="flex items-start gap-6 group cursor-pointer"
+                        >
+                            <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-[#1E3A8A] flex-shrink-0 group-hover:bg-[#1E3A8A] group-hover:text-white transition-colors">
                                 <Phone size={24} />
                             </div>
                             <div>
                                 <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Call Us</p>
-                                <p className="text-xl font-black text-slate-800">0823076935</p>
+                                <p className="text-xl font-black text-slate-800 group-hover:text-[#1E3A8A]">0823076935</p>
                             </div>
-                        </div>
+                        </a>
 
                         <div className="flex items-start gap-6">
                             <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center text-[#1E3A8A] flex-shrink-0">
