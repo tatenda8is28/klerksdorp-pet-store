@@ -5,13 +5,13 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import StoreHeader from '../components/StoreHeader';
 import Footer from '../components/Footer';
-import { Loader2, ChevronLeft, Banknote, CreditCard } from 'lucide-react';
+import { Loader2, ChevronLeft, Banknote, CreditCard, X } from 'lucide-react';
 import ReactGA from "react-ga4";
 
 const DELIVERY_SLOTS = ['Morning (08:00 - 12:00)', 'Afternoon (12:00 - 16:00)'];
 
 export default function Checkout() {
-    const { cart, getCartTotal, clearCart } = useCart();
+    const { cart, getCartTotal, clearCart, removeFromCart } = useCart();
     const { user } = useAuth();
     const navigate = useNavigate();
     const [loading, setLoading] = useState(false);
@@ -37,6 +37,8 @@ export default function Checkout() {
             return;
         }
 
+        if (cart.length === 0) return alert("Your cart is empty!");
+
         setLoading(true);
         try {
             const { data: order, error } = await supabase.from('orders').insert([{ ...formData, total_amount: getCartTotal() + 40, status: 'Pending', user_id: user.id }]).select('id').single();
@@ -44,7 +46,6 @@ export default function Checkout() {
                 const items = cart.map(i => ({ order_id: order.id, product_id: i.id, quantity: i.quantity, price_at_time: i.price }));
                 await supabase.from('order_items').insert(items);
 
-                // Analytics Injection: Purchase Event
                 ReactGA.event("purchase", {
                     transaction_id: order.id,
                     value: getCartTotal() + 40,
@@ -60,7 +61,7 @@ export default function Checkout() {
 
                 clearCart();
                 navigate('/orders');
-            }
+            } else { alert(error.message); }
         } catch (err) { alert(err.message); }
         setLoading(false);
     };
@@ -71,7 +72,7 @@ export default function Checkout() {
             <main className="max-w-7xl mx-auto px-6 py-10 lg:py-20">
                 <div className="flex justify-between items-end mb-10">
                     <h1 className="text-4xl lg:text-6xl font-black italic uppercase tracking-tighter text-[#1E3A8A]">Finish Order</h1>
-                    <button onClick={() => navigate('/store')} className="text-[10px] font-black uppercase text-gray-400">Back</button>
+                    <button onClick={() => navigate('/store')} className="text-[10px] font-black uppercase text-gray-400 border px-4 py-2 rounded-xl hover:bg-slate-100 transition-all">Back</button>
                 </div>
 
                 <div className="grid gap-10 lg:grid-cols-[1.2fr_0.8fr]">
@@ -95,7 +96,7 @@ export default function Checkout() {
                                 <CreditCard className="mb-2" /> <p className="font-black uppercase text-[10px]">Card on Delivery</p>
                             </button>
                         </div>
-                        <button disabled={loading || !cart.length} className="w-full bg-[#1E3A8A] text-white py-6 rounded-[30px] font-black uppercase italic text-xl">
+                        <button disabled={loading || !cart.length} className="w-full bg-[#1E3A8A] text-white py-6 rounded-[30px] font-black uppercase italic text-xl shadow-lg hover:bg-black transition-all">
                             {loading ? <Loader2 className="animate-spin mx-auto" /> : `Confirm Order R ${getCartTotal() + 40}`}
                         </button>
                     </form>
@@ -104,11 +105,22 @@ export default function Checkout() {
                         <h2 className="text-2xl font-black uppercase italic mb-8 border-b border-white/10 pb-6 text-yellow-400">Order Summary</h2>
                         <div className="space-y-4 mb-8">
                             {cart.map(item => (
-                                <div key={item.id} className="flex justify-between bg-white/10 p-5 rounded-2xl">
-                                    <p className="font-bold text-sm">{item.quantity}x {item.name}</p>
-                                    <p className="font-black text-yellow-300 italic">R {item.price * item.quantity}</p>
+                                <div key={item.id} className="flex justify-between items-center bg-white/10 p-5 rounded-2xl relative shadow-sm border border-white/5">
+                                    <div className="flex-1">
+                                        <p className="font-bold text-sm leading-tight pr-4">{item.quantity}x {item.name}</p>
+                                        <p className="font-black text-yellow-300 italic text-sm mt-1">R {item.price * item.quantity}</p>
+                                    </div>
+                                    {/* FIXED: Removed opacity-0 classes to make button always visible */}
+                                    <button 
+                                        type="button" 
+                                        onClick={() => removeFromCart(item.id)}
+                                        className="p-2 rounded-xl bg-red-500/20 text-red-200 transition-all hover:bg-red-500 hover:text-white"
+                                    >
+                                        <X size={16} />
+                                    </button>
                                 </div>
                             ))}
+                            {cart.length === 0 && <p className="text-center font-bold text-blue-200 py-4 italic">No items in cart</p>}
                         </div>
                         <div className="space-y-3 px-2 border-t border-white/10 pt-6">
                             <div className="flex justify-between text-[10px] font-black uppercase tracking-widest text-blue-200"><span>Items</span><span>R {getCartTotal()}</span></div>

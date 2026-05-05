@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import AdminLayout from '../components/AdminLayout';
 import { supabase } from '../lib/supabase';
-import { Package, Truck, CheckCircle, Clock, MapPin, Loader2, Download, Calendar } from 'lucide-react';
+import { Package, Truck, CheckCircle, Clock, MapPin, Loader2, Download, Calendar, Trash2 } from 'lucide-react';
 import { jsPDF } from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
@@ -15,13 +15,11 @@ export default function AdminOrders() {
     const [driverMap, setDriverMap] = useState({});
 
     const fetchOrders = async () => {
-        // 1. Fetch Drivers first to get names for the lookup
         const { data: drvData } = await supabase.from('drivers').select('id, name');
         const map = {};
         drvData?.forEach(d => map[d.id] = d.name);
         setDriverMap(map);
 
-        // 2. Fetch Orders
         const { data } = await supabase.from('orders').select('*').order('created_at', { ascending: false });
         setOrders(data || []);
         setLoading(false);
@@ -48,6 +46,28 @@ export default function AdminOrders() {
     const setReady = async (id) => {
         await supabase.from('orders').update({ status: 'Ready for Pickup' }).eq('id', id);
         fetchOrders();
+    };
+
+    // FIXED: Performs sequential deletion to avoid foreign key errors
+    const deleteOrder = async (id) => {
+        if (!confirm("Delete this order? This will remove all associated records.")) return;
+        
+        // Step 1: Delete children (order_items) first
+        const { error: itemsError } = await supabase.from('order_items').delete().eq('order_id', id);
+        
+        if (itemsError) {
+            alert("Error clearing order items: " + itemsError.message);
+            return;
+        }
+
+        // Step 2: Delete parent (orders)
+        const { error: orderError } = await supabase.from('orders').delete().eq('id', id);
+        
+        if (!orderError) {
+            fetchOrders();
+        } else {
+            alert("Error deleting order: " + orderError.message);
+        }
     };
 
     const filterOrdersByDateRange = () => {
@@ -137,11 +157,16 @@ export default function AdminOrders() {
                                                 </div>
                                             </div>
                                             <div className="flex items-center gap-10">
-                                                <div className="text-right">
-                                                    <p className="text-2xl font-black text-[#1E3A8A] italic">R {order.total_amount}</p>
-                                                    <p className="text-[10px] font-black uppercase text-gray-400 tracking-tighter">
-                                                        {order.status} • {driverMap[order.driver_id] || 'Unassigned'}
-                                                    </p>
+                                                <div className="flex items-center gap-4 text-right pr-6 border-r border-slate-100">
+                                                    <div>
+                                                        <p className="text-2xl font-black text-[#1E3A8A] italic">R {order.total_amount}</p>
+                                                        <p className="text-[10px] font-black uppercase text-gray-400 tracking-tighter">
+                                                            {order.status} • {driverMap[order.driver_id] || 'Unassigned'}
+                                                        </p>
+                                                    </div>
+                                                    <button onClick={() => deleteOrder(order.id)} className="p-3 text-red-300 hover:text-red-600 transition-colors">
+                                                        <Trash2 size={20} />
+                                                    </button>
                                                 </div>
                                                 {order.status === 'Pending' && <button onClick={() => setReady(order.id)} className="bg-[#1E3A8A] text-white px-8 py-4 rounded-3xl font-black uppercase italic text-xs shadow-lg hover:bg-blue-900 transition-all">Confirm & Pack</button>}
                                                 <button onClick={() => toggleOrderDetails(order.id)} className="bg-slate-100 text-slate-700 px-6 py-3 rounded-3xl font-black uppercase italic tracking-tighter text-xs border border-slate-200 hover:bg-slate-200 transition-all">

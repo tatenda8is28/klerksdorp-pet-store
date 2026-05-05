@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { supabase } from '../lib/supabase';
 import AdminLayout from '../components/AdminLayout';
-import { Plus, Minus, Package, AlertTriangle, TrendingUp, Loader2, Trash2 } from 'lucide-react';
+import { Plus, Minus, Package, AlertTriangle, TrendingUp, Loader2, Trash2, Edit3, X } from 'lucide-react';
 
 export default function AdminInventory() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('All');
+  const [editingId, setEditingId] = useState(null); 
   const [form, setForm] = useState({ name: '', brand: 'Montego', image_url: '', price: '', category: 'Dog Food', stock: 0 });
   const [imagePreview, setImagePreview] = useState(null);
   const [uploading, setUploading] = useState(false);
@@ -51,7 +52,6 @@ export default function AdminInventory() {
     setUploading(true);
     const fileName = `${Date.now()}_${file.name.replace(/\s+/g, '_')}`;
     
-    // Uploads to the products/ folder in your bucket
     const { data, error } = await supabase.storage
       .from('product-images')
       .upload(`products/${fileName}`, file);
@@ -65,22 +65,54 @@ export default function AdminInventory() {
     setUploading(false);
   }
 
-  async function handleAddProduct(e) {
+  const startEdit = (product) => {
+    setEditingId(product.id);
+    setForm({
+      name: product.name,
+      brand: product.brand,
+      image_url: product.image_url,
+      price: product.price,
+      category: product.category,
+      stock: product.stock_level
+    });
+    setImagePreview(product.image_url);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setForm({ name: '', brand: 'Montego', image_url: '', price: '', category: 'Dog Food', stock: 0 });
+    setImagePreview(null);
+  };
+
+  async function handleSubmit(e) {
     e.preventDefault();
-    const { data, error } = await supabase.from('products').insert([{
+    const productData = {
       name: form.name,
       brand: form.brand,
       image_url: form.image_url,
       price: parseFloat(form.price),
       category: form.category,
       stock_level: parseInt(form.stock, 10)
-    }]).select();
+    };
 
-    if (!error && data) {
-      setProducts(prev => [...prev, ...data]);
-      setForm({ name: '', brand: 'Montego', image_url: '', price: '', category: 'Dog Food', stock: 0 });
-      setImagePreview(null);
+    if (editingId) {
+      const { error } = await supabase.from('products').update(productData).eq('id', editingId);
+      if (!error) {
+        setEditingId(null);
+        alert("Product updated successfully!");
+      } else {
+        alert("Error updating: " + error.message);
+      }
+    } else {
+      const { data, error } = await supabase.from('products').insert([productData]).select();
+      if (!error && data) {
+        setProducts(prev => [...prev, ...data]);
+      }
     }
+
+    setForm({ name: '', brand: 'Montego', image_url: '', price: '', category: 'Dog Food', stock: 0 });
+    setImagePreview(null);
   }
 
   async function handleDeleteProduct(id) {
@@ -122,15 +154,23 @@ export default function AdminInventory() {
 
         <div className="grid grid-cols-1 xl:grid-cols-4 gap-10">
           <div className="xl:col-span-1">
-            <form onSubmit={handleAddProduct} className="bg-white p-8 rounded-[2.5rem] shadow-xl border border-slate-100 sticky top-10">
-              <h3 className="text-lg font-black uppercase italic text-[#004694] mb-6">Receive New Batch</h3>
+            <form onSubmit={handleSubmit} className={`p-8 rounded-[2.5rem] shadow-xl border sticky top-10 transition-all ${editingId ? 'bg-blue-50 border-blue-200' : 'bg-white border-slate-100'}`}>
+              <div className="flex justify-between items-center mb-6">
+                <h3 className="text-lg font-black uppercase italic text-[#004694]">
+                  {editingId ? 'Update Product' : 'Receive New Batch'}
+                </h3>
+                {editingId && (
+                  <button type="button" onClick={cancelEdit} className="p-2 bg-white rounded-full shadow-sm text-slate-400 hover:text-red-500">
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
               <div className="space-y-4">
                 <input type="text" placeholder="Item Name" className="w-full bg-slate-50 p-4 rounded-2xl border-none font-bold" value={form.name} onChange={e => setForm({...form, name: e.target.value})} required />
                 <input type="text" placeholder="Brand" className="w-full bg-slate-50 p-4 rounded-2xl border-none font-bold" value={form.brand} onChange={e => setForm({...form, brand: e.target.value})} required />
                 
                 <div className="space-y-3">
                   <label className="block">
-                    {/* Updated attributes to better trigger the Camera/Gallery menu on mobile */}
                     <input 
                       type="file" 
                       accept="image/*"
@@ -151,8 +191,10 @@ export default function AdminInventory() {
                   {categories.filter(c => c !== 'All').map(c => <option key={c} value={c}>{c}</option>)}
                 </select>
                 <input type="number" placeholder="Price (R)" className="w-full bg-slate-50 p-4 rounded-2xl border-none font-bold" value={form.price} onChange={e => setForm({...form, price: e.target.value})} required />
-                <input type="number" placeholder="Opening Stock" className="w-full bg-slate-50 p-4 rounded-2xl border-none font-bold" value={form.stock} onChange={e => setForm({...form, stock: e.target.value})} required />
-                <button className="w-full bg-[#004694] text-white py-5 rounded-2xl font-black uppercase tracking-widest hover:bg-black transition-all shadow-lg">Register Stock</button>
+                <input type="number" placeholder="Stock Level" className="w-full bg-slate-50 p-4 rounded-2xl border-none font-bold" value={form.stock} onChange={e => setForm({...form, stock: e.target.value})} required />
+                <button className={`w-full py-5 rounded-2xl font-black uppercase tracking-widest transition-all shadow-lg text-white ${editingId ? 'bg-green-600 hover:bg-black' : 'bg-[#004694] hover:bg-black'}`}>
+                  {editingId ? 'Save Changes' : 'Register Stock'}
+                </button>
               </div>
             </form>
           </div>
@@ -170,9 +212,14 @@ export default function AdminInventory() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {filteredProducts.map(product => (
                   <div key={product.id} className="relative bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm overflow-hidden group hover:shadow-md transition-all">
-                    <button onClick={() => handleDeleteProduct(product.id)} className="absolute top-4 right-4 z-10 w-11 h-11 rounded-2xl bg-red-50 text-red-600 border border-red-100 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center shadow-sm">
-                      <Trash2 size={18} />
-                    </button>
+                    <div className="absolute top-4 right-4 z-10 flex gap-2">
+                      <button onClick={() => startEdit(product)} className="w-11 h-11 rounded-2xl bg-blue-50 text-blue-600 border border-blue-100 hover:bg-blue-500 hover:text-white transition-all flex items-center justify-center shadow-sm">
+                        <Edit3 size={18} />
+                      </button>
+                      <button onClick={() => handleDeleteProduct(product.id)} className="w-11 h-11 rounded-2xl bg-red-50 text-red-600 border border-red-100 hover:bg-red-500 hover:text-white transition-all flex items-center justify-center shadow-sm">
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
                     <div className="flex items-center gap-5 mb-6">
                       <div className="w-24 h-24 rounded-[2rem] overflow-hidden border border-slate-100 bg-slate-50 flex items-center justify-center">
                         {product.image_url ? (
@@ -181,7 +228,7 @@ export default function AdminInventory() {
                           <span className="text-[10px] uppercase font-black text-slate-400">No image</span>
                         )}
                       </div>
-                      <div>
+                      <div className="pr-12">
                         <div className="flex items-center gap-3 mb-3">
                           <span className="text-[13px] font-black text-slate-900 uppercase tracking-[0.15em]">{product.stock_level}</span>
                           <span className="text-[9px] uppercase tracking-[0.3em] text-slate-400">Stock</span>
