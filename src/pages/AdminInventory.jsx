@@ -12,7 +12,7 @@ export default function AdminInventory() {
   const [imagePreview, setImagePreview] = useState(null);
   const [uploading, setUploading] = useState(false);
 
-  // Added "Snacks & Treats" category
+  // Added "Snacks & Treats"
   const categories = ["All", "Dog Food", "Cat Food", "Bird Food", "Snacks & Treats", "Medicine", "Accessories"];
 
   useEffect(() => {
@@ -229,13 +229,13 @@ export default function AdminInventory() {
                           <span className="text-[10px] uppercase font-black text-slate-400">No image</span>
                         )}
                       </div>
-                      <div className="pr-12">
+                      <div className="flex-1">
                         <div className="flex items-center gap-3 mb-3">
                           <span className="text-[13px] font-black text-slate-900 uppercase tracking-[0.15em]">{product.stock_level}</span>
                           <span className="text-[9px] uppercase tracking-[0.3em] text-slate-400">Stock</span>
                         </div>
-                        {/* Adjusted h4 to fix mobile clipping */}
-                        <h4 className="font-black text-slate-800 uppercase italic leading-tight mb-2 break-words">{product.name}</h4>
+                        {/* MOBILE FIX: Removed leading-none and tracking-tight to allow full name wrap */}
+                        <h4 className="font-black text-slate-800 uppercase italic leading-normal mb-2 break-words">{product.name}</h4>
                         <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{product.brand} • {product.category}</p>
                       </div>
                     </div>
