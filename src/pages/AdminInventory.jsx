@@ -12,7 +12,8 @@ export default function AdminInventory() {
   const [imagePreview, setImagePreview] = useState(null);
   const [uploading, setUploading] = useState(false);
 
-  const categories = ["All", "Dog Food", "Cat Food", "Bird Food", "Medicine", "Accessories"];
+  // Added "Snacks & Treats" category
+  const categories = ["All", "Dog Food", "Cat Food", "Bird Food", "Snacks & Treats", "Medicine", "Accessories"];
 
   useEffect(() => {
     let active = true;
@@ -233,7 +234,8 @@ export default function AdminInventory() {
                           <span className="text-[13px] font-black text-slate-900 uppercase tracking-[0.15em]">{product.stock_level}</span>
                           <span className="text-[9px] uppercase tracking-[0.3em] text-slate-400">Stock</span>
                         </div>
-                        <h4 className="font-black text-slate-800 uppercase italic tracking-tight leading-none mb-2">{product.name}</h4>
+                        {/* Adjusted h4 to fix mobile clipping */}
+                        <h4 className="font-black text-slate-800 uppercase italic leading-tight mb-2 break-words">{product.name}</h4>
                         <p className="text-[9px] font-black text-slate-300 uppercase tracking-widest">{product.brand} • {product.category}</p>
                       </div>
                     </div>

@@ -15,7 +15,8 @@ export default function Store() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 20;
 
-  const categories = ["All", "Dog Food", "Cat Food", "Bird Food", "Medicine", "Accessories"];
+  // Added "Snacks & Treats"
+  const categories = ["All", "Dog Food", "Cat Food", "Bird Food", "Snacks & Treats", "Medicine", "Accessories"];
 
   useEffect(() => {
     let channel;
